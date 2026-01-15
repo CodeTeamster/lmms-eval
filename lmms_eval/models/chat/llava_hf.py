@@ -1,5 +1,7 @@
 import time
 import warnings
+import os
+import json
 from typing import List
 
 from tqdm import tqdm
@@ -97,7 +99,15 @@ class LlavaHf(LlavaHfSimple):
                     eos_token_id=self.eot_token_id,
                 )
                 end_time = time.time()
-                cont = cont[:, inputs["input_ids"].shape[-1] :]
+
+                if os.environ.get('RANDOM_DISCARD') is not None:
+                    random_discard = json.loads(os.environ['RANDOM_DISCARD'])
+                    inputs.input_ids, _, _, _ = self.model.prepare_inputs_for_discard(
+                        input_ids=inputs.input_ids,
+                        discard_rate=random_discard['discard_rate'],
+                        discard_before_layer=random_discard['discard_before_layer'],
+                    )
+                cont = cont[:, inputs.input_ids.shape[-1] :]
 
                 # Calculate timing metrics
                 e2e_latency += end_time - start_time
