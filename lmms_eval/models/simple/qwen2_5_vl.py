@@ -84,7 +84,7 @@ class Qwen2_5_VL(lmms):
 
         # Prepare model loading arguments
         model_kwargs = {
-            "torch_dtype": "bfloat16",
+            "dtype": "bfloat16",
             "device_map": self.device_map,
         }
 
@@ -101,7 +101,7 @@ class Qwen2_5_VL(lmms):
             self.reasoning_prompt = reasoning_prompt.replace("\\n", "\n")
         else:
             self.reasoning_prompt = None
-        self.processor = AutoProcessor.from_pretrained(pretrained, max_pixels=max_pixels, min_pixels=min_pixels)
+        self.processor = AutoProcessor.from_pretrained(pretrained, max_pixels=max_pixels, min_pixels=min_pixels, use_fast=True)
         self._tokenizer = AutoTokenizer.from_pretrained(pretrained)
         self.system_prompt = system_prompt
         self.interleave_visuals = interleave_visuals

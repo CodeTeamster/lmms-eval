@@ -1,4 +1,6 @@
 import time
+import os
+import json
 from typing import List
 
 from loguru import logger as eval_logger
@@ -143,6 +145,13 @@ class Qwen2_5_VL(Qwen2_5_VLSimple):
             )
             end_time = time.time()
 
+            if os.environ.get('RANDOM_DISCARD') is not None:
+                random_discard = json.loads(os.environ['RANDOM_DISCARD'])
+                inputs.input_ids, _, _, _ = self.model.prepare_inputs_for_discard(
+                    input_ids=inputs.input_ids,
+                    discard_rate=random_discard['discard_rate'],
+                    discard_before_layer=random_discard['discard_before_layer'],
+                )
             generated_ids_trimmed = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, cont)]
             answers = self.processor.batch_decode(
                 generated_ids_trimmed,
